@@ -72,6 +72,13 @@ Follow these steps to quickly set up and run the ChatGPT Retrieval Plugin:
    export BEARER_TOKEN=<your_bearer_token>
    export OPENAI_API_KEY=<your_openai_api_key>
 
+   # Optional environment variables used when running Azure OpenAI
+   export OPENAI_API_BASE=https://<AzureOpenAIName>.openai.azure.com/ 
+   export OPENAI_API_TYPE=azure
+   export OPENAI_EMBEDDINGMODEL_DEPLOYMENTID=<Name of text-embedding-ada-002 model deployment>
+   export OPENAI_METADATA_EXTRACTIONMODEL_DEPLOYMENTID=<Name of deployment of model for metatdata>
+   export OPENAI_COMPLETIONMODEL_DEPLOYMENTID=<Name of general model deployment used for completion>
+
    # Add the environment variables for your chosen vector DB.
    # Some of these are optional; read the provider's setup docs in /docs/providers for more information.
 
@@ -81,16 +88,9 @@ Follow these steps to quickly set up and run the ChatGPT Retrieval Plugin:
    export PINECONE_INDEX=<your_pinecone_index>
 
    # Weaviate
-   export WEAVIATE_HOST=<your_weaviate_instance_url>
-   export WEAVIATE_PORT=<your_weaviate_port_443_for_WCS>
+   export WEAVIATE_URL=<your_weaviate_instance_url>
+   export WEAVIATE_API_KEY=<your_api_key_for_WCS>
    export WEAVIATE_CLASS=<your_optional_weaviate_class>
-   export WEAVIATE_USERNAME=<your_weaviate_WCS_username>
-   export WEAVIATE_PASSWORD=<your_weaviate_WCS_password>
-   export WEAVIATE_SCOPES=<your_optional_weaviate_scopes>
-   export WEAVIATE_BATCH_SIZE=<optional_weaviate_batch_size>
-   export WEAVIATE_BATCH_DYNAMIC=<optional_weaviate_batch_dynamic>
-   export WEAVIATE_BATCH_TIMEOUT_RETRIES=<optional_weaviate_batch_timeout_retries>
-   export WEAVIATE_BATCH_NUM_WORKERS=<optional_weaviate_batch_num_workers>
 
    # Zilliz
    export ZILLIZ_COLLECTION=<your_zilliz_collection>
@@ -120,6 +120,12 @@ Follow these steps to quickly set up and run the ChatGPT Retrieval Plugin:
    export REDIS_DOC_PREFIX=<your_redis_doc_prefix>
    export REDIS_DISTANCE_METRIC=<your_redis_distance_metric>
    export REDIS_INDEX_TYPE=<your_redis_index_type>
+   
+   # Llama
+   export LLAMA_INDEX_TYPE=<gpt_vector_index_type>
+   export LLAMA_INDEX_JSON_PATH=<path_to_saved_index_json_file>
+   export LLAMA_QUERY_KWARGS_JSON_PATH=<path_to_saved_query_kwargs_json_file>
+   export LLAMA_RESPONSE_MODE=<response_mode_for_query> 
    ```
 
 10. Run the API locally: `poetry run start`
@@ -236,6 +242,17 @@ The API requires the following environment variables to work:
 | `DATASTORE`      | Yes      | This specifies the vector database provider you want to use to store and query embeddings. You can choose from `pinecone`, `weaviate`, `zilliz`, `milvus`, `qdrant`, or `redis`.           |
 | `BEARER_TOKEN`   | Yes      | This is a secret token that you need to authenticate your requests to the API. You can generate one using any tool or method you prefer, such as [jwt.io](https://jwt.io/).                |
 | `OPENAI_API_KEY` | Yes      | This is your OpenAI API key that you need to generate embeddings using the `text-embedding-ada-002` model. You can get an API key by creating an account on [OpenAI](https://openai.com/). |
+
+
+### Using the plugin with Azure OpenAI
+
+The Azure Open AI uses URLs that are specific to your resource and references models not by model name but by the deployment id. As a result, you need to set additional environment variables for this case.
+
+In addition to the OPENAI_API_BASE (your specific URL) and OPENAI_API_TYPE (azure), you should also set OPENAI_EMBEDDINGMODEL_DEPLOYMENTID which specifies the model to use for getting embeddings on upsert and query. For this, we recommend deploying text-embedding-ada-002 model and using the deployment name here. 
+
+If you wish to use the data preparation scripts, you will also need to set  OPENAI_METADATA_EXTRACTIONMODEL_DEPLOYMENTID, used for metadata extraction and 
+OPENAI_COMPLETIONMODEL_DEPLOYMENTID, used for PII handling.
+
 
 ### Choosing a Vector Database
 
@@ -458,3 +475,6 @@ We would like to extend our gratitude to the following contributors for their co
 - [Redis](https://redis.io/)
   - [spartee](https://github.com/spartee)
   - [tylerhutcherson](https://github.com/tylerhutcherson)
+- [LlamaIndex](https://github.com/jerryjliu/llama_index)
+  - [jerryjliu](https://github.com/jerryjliu)
+  - [Disiok](https://github.com/Disiok)
