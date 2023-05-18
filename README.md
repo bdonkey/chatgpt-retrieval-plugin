@@ -8,17 +8,18 @@ Find an example video of a Retrieval Plugin that has access to the UN Annual Rep
 
 The ChatGPT Retrieval Plugin repository provides a flexible solution for semantic search and retrieval of personal or organizational documents using natural language queries. The repository is organized into several directories:
 
-| Directory                     | Description                                                                                                                |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| [`datastore`](/datastore)     | Contains the core logic for storing and querying document embeddings using various vector database providers.              |
-| [`docs`](/docs)               | Includes documentation for setting up and using each vector database provider, webhooks, and removing unused dependencies. |
-| [`examples`](/examples)       | Provides example configurations, authentication methods, and provider-specific examples.                                   |
-| [`models`](/models)           | Contains the data models used by the plugin, such as document and metadata models.                                         |
-| [`scripts`](/scripts)         | Offers scripts for processing and uploading documents from different data sources.                                         |
-| [`server`](/server)           | Houses the main FastAPI server implementation.                                                                             |
-| [`services`](/services)       | Contains utility services for tasks like chunking, metadata extraction, and PII detection.                                 |
-| [`tests`](/tests)             | Includes integration tests for various vector database providers.                                                          |
-| [`.well-known`](/.well-known) | Stores the plugin manifest file and OpenAPI schema, which define the plugin configuration and API specification.           |
+| Directory                       | Description                                                                                                                |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| [`datastore`](/datastore)       | Contains the core logic for storing and querying document embeddings using various vector database providers.              |
+| [`docs`](/docs)                 | Includes documentation for setting up and using each vector database provider, webhooks, and removing unused dependencies. |
+| [`examples`](/examples)         | Provides example configurations, authentication methods, and provider-specific examples.                                   |
+| [`local_server`](/local_server) | Contains an implementation of the retrieval plugin configured for localhost testing.                                       |
+| [`models`](/models)             | Contains the data models used by the plugin, such as document and metadata models.                                         |
+| [`scripts`](/scripts)           | Offers scripts for processing and uploading documents from different data sources.                                         |
+| [`server`](/server)             | Houses the main FastAPI server implementation.                                                                             |
+| [`services`](/services)         | Contains utility services for tasks like chunking, metadata extraction, and PII detection.                                 |
+| [`tests`](/tests)               | Includes integration tests for various vector database providers.                                                          |
+| [`.well-known`](/.well-known)   | Stores the plugin manifest file and OpenAPI schema, which define the plugin configuration and API specification.           |
 
 This README provides detailed information on how to set up, develop, and deploy the ChatGPT Retrieval Plugin.
 
@@ -276,10 +277,10 @@ The API requires the following environment variables to work:
 
 The Azure Open AI uses URLs that are specific to your resource and references models not by model name but by the deployment id. As a result, you need to set additional environment variables for this case.
 
-In addition to the OPENAI_API_BASE (your specific URL) and OPENAI_API_TYPE (azure), you should also set OPENAI_EMBEDDINGMODEL_DEPLOYMENTID which specifies the model to use for getting embeddings on upsert and query. For this, we recommend deploying text-embedding-ada-002 model and using the deployment name here.
+In addition to the `OPENAI_API_BASE` (your specific URL) and `OPENAI_API_TYPE` (azure), you should also set `OPENAI_EMBEDDINGMODEL_DEPLOYMENTID` which specifies the model to use for getting embeddings on upsert and query. For this, we recommend deploying `text-embedding-ada-002` model and using the deployment name here.
 
-If you wish to use the data preparation scripts, you will also need to set OPENAI_METADATA_EXTRACTIONMODEL_DEPLOYMENTID, used for metadata extraction and
-OPENAI_COMPLETIONMODEL_DEPLOYMENTID, used for PII handling.
+If you wish to use the data preparation scripts, you will also need to set `OPENAI_METADATA_EXTRACTIONMODEL_DEPLOYMENTID`, used for metadata extraction and
+`OPENAI_COMPLETIONMODEL_DEPLOYMENTID`, used for PII handling.
 
 ### Choosing a Vector Database
 
@@ -335,7 +336,7 @@ For detailed setup instructions, refer to [`/docs/providers/llama/setup.md`](/do
 
 #### Postgres
 
-[Postgres](https://www.postgresql.org) offers an easy and efficient way to store vectors via [pgvector](https://github.com/pgvector/pgvector) extension. To use pgvector, you will need to set up a PostgreSQL database with the pgvector extension enabled. For example, you can [use docker](https://www.docker.com/blog/how-to-use-the-postgres-docker-official-image/) to run locally. For a hosted/managed solution, you may try [Supabase](https://supabase.com/) or any other cloud provider with support for pgvector. For detailed setup instructions, refer to [`/docs/providers/postgres/setup.md`](/docs/providers/postgres/setup.md).
+[Postgres](https://www.postgresql.org) offers an easy and efficient way to store vectors via [pgvector](https://github.com/pgvector/pgvector) extension. To use pgvector, you will need to set up a PostgreSQL database with the pgvector extension enabled. For example, you can [use docker](https://www.docker.com/blog/how-to-use-the-postgres-docker-official-image/) to run locally. For a hosted/managed solution, you can use any of the cloud vendors which support [pgvector](https://github.com/pgvector/pgvector#hosted-postgres). For detailed setup instructions, refer to [`/docs/providers/postgres/setup.md`](/docs/providers/postgres/setup.md).
 
 ### Running the API locally
 
@@ -408,21 +409,13 @@ You can deploy your app to different cloud providers, depending on your preferen
 
 Before deploying your app, you might want to remove unused dependencies from your [pyproject.toml](/pyproject.toml) file to reduce the size of your app and improve its performance. Depending on the vector database provider you choose, you can remove the packages that are not needed for your specific provider. Refer to the respective documentation in the [`/docs/deployment/removing-unused-dependencies.md`](/docs/deployment/removing-unused-dependencies.md) file for information on removing unused dependencies for each provider.
 
-Once you have deployed your app, consider uploading an initial batch of documents using one of [these scripts](/scripts) or by calling the `/upsert` endpoint.
-
-- **Chroma:** Remove `pinecone-client`, `weaviate-client`, `pymilvus`, `qdrant-client`, and `redis`.
-- **Pinecone:** Remove `chromadb`, `weaviate-client`, `pymilvus`, `qdrant-client`, and `redis`.
-- **Weaviate:** Remove `chromadb`, `pinecone-client`, `pymilvus`, `qdrant-client`, and `redis`.
-- **Zilliz:** Remove `chromadb`, `pinecone-client`, `weaviate-client`, `qdrant-client`, and `redis`.
-- **Milvus:** Remove `chromadb`, `pinecone-client`, `weaviate-client`, `qdrant-client`, and `redis`.
-- **Qdrant:** Remove `chromadb`, `pinecone-client`, `weaviate-client`, `pymilvus`, and `redis`.
-- **Redis:** Remove `chromadb`, `pinecone-client`, `weaviate-client`, `pymilvus`, and `qdrant-client`.
+Instructions:
 
 - [Deploying to Fly.io](/docs/deployment/flyio.md)
 - [Deploying to Heroku](/docs/deployment/heroku.md)
 - [Other Deployment Options](/docs/deployment/other-options.md) (Azure Container Apps, Google Cloud Run, AWS Elastic Container Service, etc.)
 
-After you create your app, make sure to change the plugin url in your plugin manifest file [here](/.well-known/ai-plugin.json), and in your OpenAPI schema [here](/.well-known/openapi.yaml), and redeploy.
+Once you have deployed your app, consider uploading an initial batch of documents using one of [these scripts](/scripts) or by calling the `/upsert` endpoint.
 
 ## Installing a Developer Plugin
 
