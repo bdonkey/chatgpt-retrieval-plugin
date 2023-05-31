@@ -1,0 +1,44 @@
+
+FROM python:3.10 as requirements-stage
+
+WORKDIR /tmp
+
+# ss from https://github.com/openai/chatgpt-retrieval-plugin/pull/141/files
+RUN apt-get update
+RUN pip install --upgrade pip
+
+
+RUN pip install poetry
+
+COPY ./pyproject.toml ./poetry.lock* /tmp/
+
+
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+FROM python:3.10
+
+# from https://github.com/openai/chatgpt-retrieval-plugin/pull/141/files
+RUN apt-get install -y gcc curl
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+SHELL ["bash", "-lc"]
+
+
+WORKDIR /code
+
+COPY --from=requirements-stage /tmp/requirements.txt /code/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+COPY . /code/
+
+#ss set env variables
+ENV BEARER_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6ImtvcnRlIGNvbnN0cnVjdGlvbiIsImlhdCI6MTUxNjIzOTAyMn0.PnjNCFsjiYpKvIqhEOl43hrgL9_KOQt4dPe6_DTxMx0
+ENV DATASTORE=pinecone
+ENV PINECONE_API_KEY=418ca099-c93e-44c4-b3f2-bf40adf7b541
+ENV PINECONE_ENVIRONMENT=us-west1-gcp
+ENV PINECONE_INDEX=tkc
+ENV OPENAI_API_KEY=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
+
+# Heroku uses PORT, Azure App Services uses WEBSITES_PORT, Fly.io uses 8080 by default
+CMD ["sh", "-c", "uvicorn server.main:app --host 0.0.0.0 --port ${PORT:-${WEBSITES_PORT:-8081}}"]
+ 
